@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ru.yandex.practicum</groupId>
-    <artifactId>task_3_stellar_burgers_ui</artifactId>
+    <groupId>ru.stellarburgers</groupId>
+    <artifactId>stellar-burgers-ui-tests</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -13,16 +12,21 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <allure.version>2.27.0</allure.version>
-        <aspectj.version>1.9.21</aspectj.version>
+        <selenium.version>4.20.0</selenium.version>
+        <junit.version>4.13.2</junit.version>
+        <restassured.version>5.4.0</restassured.version>
+
+        <allure.version>2.29.0</allure.version>
+        <allure.junit4.version>2.29.0</allure.junit4.version>
+        <aspectj.version>1.9.25</aspectj.version>
     </properties>
 
     <dependencies>
-        <!-- JUnit 4 -->
+        <!-- JUnit4 -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -30,62 +34,81 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.141.59</version>
+            <version>${selenium.version}</version>
         </dependency>
 
-        <!-- Rest Assured для создания/удаления пользователя через API -->
+        <!-- RestAssured -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>4.4.0</version>
+            <version>${restassured.version}</version>
         </dependency>
 
-        <!-- Allure + JUnit4 -->
+        <!-- JSON (для DTO) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+
+        <!-- Allure -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit4</artifactId>
-            <version>${allure.version}</version>
+            <version>${allure.junit4.version}</version>
+            <scope>test</scope>
         </dependency>
-
-        <!-- Allure + Rest-Assured (опционально, но можно оставить) -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-rest-assured</artifactId>
+            <artifactId>allure-java-commons</artifactId>
             <version>${allure.version}</version>
-        </dependency>
-
-        <!-- AspectJ для шагов Allure (@Step) -->
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.7.0</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- surefire + подключение AspectJ-агента для Allure -->
+
+            <!-- Surefire -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <version>3.5.4</version>
                 <configuration>
+                    <testFailureIgnore>false</testFailureIgnore>
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
                     </argLine>
-                    <systemPropertyVariables>
-                        <allure.results.directory>target/allure-results</allure.results.directory>
-                    </systemPropertyVariables>
-                    <includes>
-                        <include>**/*Test.java</include>
-                    </includes>
+                    <properties>
+                        <property>
+                            <name>listener</name>
+                            <value>io.qameta.allure.junit4.AllureJunit4</value>
+                        </property>
+                    </properties>
+                    <systemProperties>
+                        <property>
+                            <!-- папка, в которую будут генерироваться отчёты Allure -->
+                            <name>allure.results.directory</name>
+                            <value>${project.build.directory}/allure-results</value>
+                        </property>
+                    </systemProperties>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                        <version>${aspectj.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
+
+            <!-- Allure report -->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.12.0</version>
+            </plugin>
+
         </plugins>
     </build>
 </project>
+
